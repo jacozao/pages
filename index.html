@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alchemco Surface Assessment Checklist</title>
+  <style>
+    :root {
+      --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --color-text-primary: #111827;
+      --color-text-secondary: #6b7280;
+      --color-border-tertiary: #d1d5db;
+      --color-border-secondary: #cbd5e1;
+      --color-background-secondary: #f8fafc;
+      --color-background-primary: #ffffff;
+      --color-background-danger: #fef2f2;
+      --color-text-danger: #b91c1c;
+      --border-radius-lg: 16px;
+      --border-radius-md: 10px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-sans);color:var(--color-text-primary);font-size:13px;background:#fff}
+    .app{padding:1rem 0;max-width:680px;margin:0 auto}
+    .tab-bar{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+    .tab{padding:9px 18px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px;font-family:var(--font-sans)}
+    .tab.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:500}
+    .tab:hover:not(.active){color:var(--color-text-primary)}
+    .panel{display:none}.panel.active{display:block}
+
+    .prog-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:.35rem}
+    .prog-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.25rem;overflow:hidden}
+    .prog-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+    .cl-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem}
+    .cl-table th{text-align:left;padding:7px 10px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    .cl-table td{padding:7px 10px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+    .cl-table tr:last-child td{border-bottom:none}
+    .cl-table tr.ck{background:var(--color-background-success)}
+    .chk-cell{text-align:center;width:48px}
+    .ini-cell{width:68px}
+    .cmt-cell{width:200px}
+    input[type=checkbox]{width:15px;height:15px;accent-color:#1D9E75;cursor:pointer}
+    input[type=text]{width:100%;padding:4px 6px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:4px;background:transparent;color:var(--color-text-primary)}
+    input[type=text]:focus{outline:none;border-color:#1D9E75}
+
+    .qgroup{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);margin-bottom:1rem;overflow:hidden}
+    .qgroup-header{padding:.75rem 1rem;background:var(--color-background-secondary);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+    .qgroup-header i{font-size:16px;color:#1D9E75}
+    .qgroup-title{font-size:13px;font-weight:500;flex:1}
+    .qgroup-prog{font-size:11px;color:var(--color-text-secondary)}
+    .chevron{font-size:14px;color:var(--color-text-secondary);transition:transform .2s}
+    .qgroup.open .chevron{transform:rotate(180deg)}
+    .qgroup-body{display:none;padding:.75rem 1rem}
+    .qgroup.open .qgroup-body{display:block}
+
+    .qrow{margin-bottom:.85rem}
+    .qrow:last-child{margin-bottom:0}
+    .qlabel{font-size:12px;color:var(--color-text-secondary);margin-bottom:.4rem;line-height:1.4}
+    .qlabel strong{color:var(--color-text-primary);font-weight:500}
+    .opt-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:.35rem}
+    .opt-btn{padding:4px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans);transition:all .15s}
+    .opt-btn.sel{background:#1D9E75;color:#fff;border-color:#1D9E75}
+    .opt-btn:hover:not(.sel){background:var(--color-background-secondary)}
+    .yn-row{display:flex;gap:6px;margin-top:.35rem}
+    .yn-btn{padding:4px 16px;border-radius:20px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans);transition:all .15s;font-weight:500}
+    .yn-btn.yes.sel{background:#1D9E75;color:#fff;border-color:#1D9E75}
+    .yn-btn.no.sel{background:#E24B4A;color:#fff;border-color:#E24B4A}
+    .yn-btn:hover:not(.sel){background:var(--color-background-secondary)}
+    .text-input{width:100%;padding:5px 8px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-primary);font-family:var(--font-sans);margin-top:.35rem}
+    .text-input:focus{outline:none;border-color:#1D9E75}
+    .inline-pair{display:flex;gap:8px;margin-top:.35rem}
+    .inline-pair input{flex:1}
+    .divider{height:0.5px;background:var(--color-border-tertiary);margin:.75rem 0}
+
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.25rem}
+    .btn{padding:7px 14px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;font-weight:500;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans);display:inline-flex;align-items:center;gap:5px}
+    .btn:hover{background:var(--color-background-secondary)}
+    .btn-primary{background:#1D9E75;color:#fff;border-color:#1D9E75}
+    .btn-primary:hover{background:#0F6E56}
+    .btn-danger{color:var(--color-text-danger);border-color:var(--color-border-danger)}
+    .btn-danger:hover{background:var(--color-background-danger)}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2 class="sr-only">Alchemco — Surface Assessment & Concrete Quality Checklist</h2>
+
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('surface',this)">Surface Assessment</button>
+      <button class="tab" onclick="switchTab('quality',this)">Concrete Quality</button>
+    </div>
+
+    <div id="panel-surface" class="panel active">
+      <div class="prog-label" id="sprog-label">0 of 14 items checked</div>
+      <div class="prog-bar"><div class="prog-fill" id="sprog-fill" style="width:0%"></div></div>
+      <table class="cl-table">
+        <thead><tr>
+          <th style="width:42%">Item</th>
+          <th class="chk-cell">Check</th>
+          <th class="ini-cell">Initial</th>
+          <th class="cmt-cell">Comments</th>
+        </tr></thead>
+        <tbody id="cl-body"></tbody>
+      </table>
+    </div>
+
+    <div id="panel-quality" class="panel">
+      <div class="qgroup open" id="g1">
+        <div class="qgroup-header" onclick="toggleGroup('g1')">
+          <i class="ti ti-building" aria-hidden="true"></i>
+          <span class="qgroup-title">Project overview</span>
+          <span class="qgroup-prog" id="g1-prog">0/3</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="qgroup-body">
+          <div class="qrow">
+            <div class="qlabel"><strong>Project type</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g1" data-k="proj_type" data-v="New construction" onclick="pickOpt(this)">New construction</button>
+              <button class="opt-btn" data-g="g1" data-k="proj_type" data-v="Retrofit" onclick="pickOpt(this)">Retrofit</button>
+              <button class="opt-btn" data-g="g1" data-k="proj_type" data-v="Repair" onclick="pickOpt(this)">Repair</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Use / occupancy</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Commercial" onclick="pickOpt(this)">Commercial</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Residential" onclick="pickOpt(this)">Residential</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Luxury residential" onclick="pickOpt(this)">Luxury residential</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Parking structure" onclick="pickOpt(this)">Parking structure</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Water tank / reservoir" onclick="pickOpt(this)">Water tank / reservoir</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Infrastructure" onclick="pickOpt(this)">Infrastructure</button>
+              <button class="opt-btn" data-g="g1" data-k="use" data-v="Industrial" onclick="pickOpt(this)">Industrial</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Project description</strong> <span style="font-weight:400">(brief overview)</span></div>
+            <input class="text-input" type="text" data-k="proj_desc" placeholder="e.g. 12-story mixed-use tower, podium deck over parking…" oninput="saveText(this)">
+          </div>
+        </div>
+      </div>
+
+      <div class="qgroup open" id="g2">
+        <div class="qgroup-header" onclick="toggleGroup('g2')">
+          <i class="ti ti-layers" aria-hidden="true"></i>
+          <span class="qgroup-title">Slab system & placement method</span>
+          <span class="qgroup-prog" id="g2-prog">0/4</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="qgroup-body">
+          <div class="qrow">
+            <div class="qlabel"><strong>Slab type</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Cast in place" onclick="pickOpt(this)">Cast in place</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Post-tension" onclick="pickOpt(this)">Post-tension</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Split slab" onclick="pickOpt(this)">Split slab</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Suspended slab" onclick="pickOpt(this)">Suspended slab</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Double T" onclick="pickOpt(this)">Double T</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Monolithic" onclick="pickOpt(this)">Monolithic</button>
+              <button class="opt-btn" data-g="g2" data-k="slab" data-v="Shotcrete / Gunite" onclick="pickOpt(this)">Shotcrete / Gunite</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Water stops present?</strong> <span style="font-weight:400">(if non-monolithic)</span></div>
+            <div class="yn-row">
+              <button class="yn-btn yes" data-g="g2" data-k="waterstop" data-v="Yes" onclick="pickYN(this)">Yes</button>
+              <button class="yn-btn no" data-g="g2" data-k="waterstop" data-v="No" onclick="pickYN(this)">No</button>
+              <button class="yn-btn" data-g="g2" data-k="waterstop" data-v="N/A" onclick="pickYN(this)" style="color:var(--color-text-secondary)">N/A</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Concrete placement method</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g2" data-k="placement" data-v="Poured directly" onclick="pickOpt(this)">Poured directly</button>
+              <button class="opt-btn" data-g="g2" data-k="placement" data-v="Pumped" onclick="pickOpt(this)">Pumped</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Structural frame system</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g2" data-k="frame" data-v="Steel frame" onclick="pickOpt(this)">Steel frame</button>
+              <button class="opt-btn" data-g="g2" data-k="frame" data-v="Concrete frame" onclick="pickOpt(this)">Concrete frame</button>
+              <button class="opt-btn" data-g="g2" data-k="frame" data-v="Beam-column" onclick="pickOpt(this)">Beam-column</button>
+              <button class="opt-btn" data-g="g2" data-k="frame" data-v="Box system" onclick="pickOpt(this)">Box system</button>
+              <button class="opt-btn" data-g="g2" data-k="frame" data-v="Unknown" onclick="pickOpt(this)">Unknown</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qgroup open" id="g3">
+        <div class="qgroup-header" onclick="toggleGroup('g3')">
+          <i class="ti ti-tools" aria-hidden="true"></i>
+          <span class="qgroup-title">Formwork & curing</span>
+          <span class="qgroup-prog" id="g3-prog">0/3</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="qgroup-body">
+          <div class="qrow">
+            <div class="qlabel"><strong>Formwork type</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g3" data-k="formwork" data-v="Aluminum / system forms" onclick="pickOpt(this)">Aluminum / system forms</button>
+              <button class="opt-btn" data-g="g3" data-k="formwork" data-v="Conventional (plywood)" onclick="pickOpt(this)">Conventional (plywood)</button>
+              <button class="opt-btn" data-g="g3" data-k="formwork" data-v="Unknown" onclick="pickOpt(this)">Unknown</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Days to formwork strip</strong> <span style="font-weight:400">(cure time before removal)</span></div>
+            <input class="text-input" type="text" data-k="cure_days" placeholder="e.g. 7 days" oninput="saveText(this)" style="max-width:200px">
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Admixtures used</strong> <span style="font-weight:400">(check all that apply)</span></div>
+            <div class="opt-grid" id="admix-grid">
+              <button class="opt-btn multi" data-k="admix_sp" onclick="toggleMulti(this)">Superplasticizer</button>
+              <button class="opt-btn multi" data-k="admix_ext" onclick="toggleMulti(this)">Extender</button>
+              <button class="opt-btn multi" data-k="admix_ret" onclick="toggleMulti(this)">Retarder</button>
+              <button class="opt-btn multi" data-k="admix_cc" onclick="toggleMulti(this)">Curing compound</button>
+              <button class="opt-btn multi" data-k="admix_none" onclick="toggleMulti(this)">None</button>
+              <button class="opt-btn multi" data-k="admix_unk" onclick="toggleMulti(this)">Unknown</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qgroup open" id="g4">
+        <div class="qgroup-header" onclick="toggleGroup('g4')">
+          <i class="ti ti-flask" aria-hidden="true"></i>
+          <span class="qgroup-title">Mix design</span>
+          <span class="qgroup-prog" id="g4-prog">0/5</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="qgroup-body">
+          <div class="qrow">
+            <div class="qlabel"><strong>Compressive strength</strong> <span style="font-weight:400">(required: 20–65 MPa / 3,000–9,500 PSI)</span></div>
+            <div class="inline-pair">
+              <input class="text-input" type="text" data-k="strength_mpa" placeholder="MPa" oninput="saveText(this)">
+              <input class="text-input" type="text" data-k="strength_psi" placeholder="PSI" oninput="saveText(this)">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Slab thickness</strong> <span style="font-weight:400">(minimum 3 in. with reinforcement)</span></div>
+            <input class="text-input" type="text" data-k="thickness" placeholder="e.g. 4 inches / 100mm" oninput="saveText(this)" style="max-width:240px">
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Fly ash content</strong> <span style="font-weight:400">(Type F max 16% · Type C max 30%)</span></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g4" data-k="flyash" data-v="Type F (≤16%)" onclick="pickOpt(this)">Type F (≤16%)</button>
+              <button class="opt-btn" data-g="g4" data-k="flyash" data-v="Type C (≤30%)" onclick="pickOpt(this)">Type C (≤30%)</button>
+              <button class="opt-btn" data-g="g4" data-k="flyash" data-v="No fly ash" onclick="pickOpt(this)">No fly ash</button>
+              <button class="opt-btn" data-g="g4" data-k="flyash" data-v="Unknown" onclick="pickOpt(this)">Unknown</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>Concrete vibrated?</strong></div>
+            <div class="yn-row">
+              <button class="yn-btn yes" data-g="g4" data-k="vibrated" data-v="Yes — well consolidated" onclick="pickYN(this)">Yes — well consolidated</button>
+              <button class="yn-btn yes" data-g="g4" data-k="vibrated" data-v="Yes — poorly consolidated" onclick="pickYN(this)">Yes — poorly</button>
+              <button class="yn-btn no" data-g="g4" data-k="vibrated" data-v="No" onclick="pickYN(this)">No</button>
+              <button class="yn-btn" data-g="g4" data-k="vibrated" data-v="Unknown" onclick="pickYN(this)" style="color:var(--color-text-secondary)">Unknown</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qgroup open" id="g5">
+        <div class="qgroup-header" onclick="toggleGroup('g5')">
+          <i class="ti ti-paint" aria-hidden="true"></i>
+          <span class="qgroup-title">Surface finish & intended use</span>
+          <span class="qgroup-prog" id="g5-prog">0/2</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="qgroup-body">
+          <div class="qrow">
+            <div class="qlabel"><strong>Surface finish method</strong></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g5" data-k="finish" data-v="Bull floated" onclick="pickOpt(this)">Bull floated</button>
+              <button class="opt-btn" data-g="g5" data-k="finish" data-v="Broom finished" onclick="pickOpt(this)">Broom finished</button>
+              <button class="opt-btn" data-g="g5" data-k="finish" data-v="Power troweled" onclick="pickOpt(this)">Power troweled</button>
+              <button class="opt-btn" data-g="g5" data-k="finish" data-v="Exposed aggregate" onclick="pickOpt(this)">Exposed aggregate</button>
+              <button class="opt-btn" data-g="g5" data-k="finish" data-v="Unknown" onclick="pickOpt(this)">Unknown</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="qrow">
+            <div class="qlabel"><strong>What goes on top of the waterproofing?</strong> <span style="font-weight:400">(subsequent systems / use)</span></div>
+            <div class="opt-grid">
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Tile / pavers" onclick="pickOpt(this)">Tile / pavers</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Topping slab" onclick="pickOpt(this)">Topping slab</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Coating / paint" onclick="pickOpt(this)">Coating / paint</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Insulation + membrane" onclick="pickOpt(this)">Insulation + membrane</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Traffic / vehicular" onclick="pickOpt(this)">Traffic / vehicular</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Exposed / bare" onclick="pickOpt(this)">Exposed / bare</button>
+              <button class="opt-btn" data-g="g5" data-k="ontop" data-v="Green roof / planting" onclick="pickOpt(this)">Green roof / planting</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="exportPDF()"><i class="ti ti-download" aria-hidden="true"></i> Export PDF</button>
+      <button class="btn" onclick="copyText()"><i class="ti ti-copy" aria-hidden="true"></i> Copy as text</button>
+      <button class="btn btn-danger" onclick="clearAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Clear all</button>
+    </div>
+  </div>
+
+  <script>
+    const surfaceItems=[
+      "Identify and document existing coatings or remnants",
+      "Identify and document paint or line striping exceeding 4\" width",
+      "Identify and document oil, grease, or chemical contamination",
+      "Identify and document laitance's, weak / loose surface layers, or dense finishes",
+      "Identify and document exposed reinforcement",
+      "Identify and document unconsolidated concrete (honeycombing, voids, etc.)",
+      "Identify and document all penetrations",
+      "Identify and document terminations",
+      "Identify and document all joints (construction, cold, expansion, etc.)",
+      "Identify and document active leaks",
+      "Identify and document any patch/repair areas and materials",
+      "Evaluate and document surface profile (CSP) and surface finish",
+      "Evaluate and document surface absorption rate (pour water test)",
+      "Identify areas needing shot blasting, etching, or abrasion to promote absorption"
+    ];
+
+    const groupCounts={g1:3,g2:4,g3:3,g4:5,g5:2};
+
+    let state={};
+
+    function loadState(){
+      try{state=JSON.parse(localStorage.getItem('alch_v2')||'{}');}catch(e){state={};}
+    }
+    function persist(){
+      localStorage.setItem('alch_v2',JSON.stringify(state));
+    }
+
+    function buildSurface(){
+      const tbody=document.getElementById('cl-body');
+      tbody.innerHTML='';
+      surfaceItems.forEach((item,i)=>{
+        const d=state['s'+i]||{};
+        const tr=document.createElement('tr');
+        if(d.checked)tr.classList.add('ck');
+        tr.id='sr'+i;
+        tr.innerHTML=`<td style="font-size:12px;line-height:1.4">${item}</td>
+        <td class="chk-cell"><input type="checkbox" ${d.checked?'checked':''} onchange="toggleSurface(${i},this)"></td>
+        <td class="ini-cell"><input type="text" value="${d.ini||''}" placeholder="initials" maxlength="8" oninput="saveSurface(${i},'ini',this.value)"></td>
+        <td class="cmt-cell"><input type="text" value="${d.cmt||''}" placeholder="N/A if not applicable" oninput="saveSurface(${i},'cmt',this.value)"></td>`;
+        tbody.appendChild(tr);
+      });
+      updateSurfaceProg();
+    }
+
+    function toggleSurface(i,cb){
+      if(!state['s'+i])state['s'+i]={};
+      state['s'+i].checked=cb.checked;
+      const tr=document.getElementById('sr'+i);
+      cb.checked?tr.classList.add('ck'):tr.classList.remove('ck');
+      persist();updateSurfaceProg();
+    }
+    function saveSurface(i,field,val){
+      if(!state['s'+i])state['s'+i]={};
+      state['s'+i][field]=val;persist();
+    }
+    function updateSurfaceProg(){
+      const checked=surfaceItems.filter((_,i)=>state['s'+i]?.checked).length;
+      const total=surfaceItems.length;
+      document.getElementById('sprog-label').textContent=`${checked} of ${total} items checked`;
+      document.getElementById('sprog-fill').style.width=`${Math.round(checked/total*100)}%`;
+    }
+
+    function restoreQuality(){
+      document.querySelectorAll('.opt-btn:not(.multi)').forEach(btn=>{
+        const k=btn.dataset.k,v=btn.dataset.v;
+        if(state[k]===v)btn.classList.add('sel');
+      });
+      document.querySelectorAll('.yn-btn').forEach(btn=>{
+        const k=btn.dataset.k,v=btn.dataset.v;
+        if(v&&state[k]===v)btn.classList.add('sel');
+      });
+      document.querySelectorAll('.opt-btn.multi').forEach(btn=>{
+        if(state[btn.dataset.k])btn.classList.add('sel');
+      });
+      document.querySelectorAll('input[data-k]').forEach(inp=>{
+        if(state[inp.dataset.k])inp.value=state[inp.dataset.k];
+      });
+      updateGroupProgs();
+    }
+
+    function pickOpt(btn){
+      const k=btn.dataset.k,g=btn.dataset.g;
+      document.querySelectorAll(`.opt-btn[data-g="${g}"][data-k="${k}"]`).forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      state[k]=btn.dataset.v;
+      persist();updateGroupProg(g);
+    }
+    function pickYN(btn){
+      const k=btn.dataset.k,g=btn.dataset.g;
+      document.querySelectorAll(`.yn-btn[data-k="${k}"]`).forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      state[k]=btn.dataset.v;
+      persist();updateGroupProg(g);
+    }
+    function toggleMulti(btn){
+      btn.classList.toggle('sel');
+      state[btn.dataset.k]=btn.classList.contains('sel')?true:undefined;
+      if(state[btn.dataset.k]===undefined)delete state[btn.dataset.k];
+      persist();
+    }
+    function saveText(inp){
+      state[inp.dataset.k]=inp.value;persist();
+    }
+
+    function groupFilledCount(gid){
+      const keys={
+        g1:['proj_type','use','proj_desc'],
+        g2:['slab','waterstop','placement','frame'],
+        g3:['formwork','cure_days',null],
+        g4:['strength_mpa','flyash','mix_doc','vibrated','thickness'],
+        g5:['finish','ontop']
+      };
+      const ks=keys[gid]||[];
+      return ks.filter(k=>k&&state[k]&&state[k]!=='').length
+        + (gid==='g3'?(['admix_sp','admix_ext','admix_ret','admix_cc','admix_none','admix_unk'].some(k=>state[k])?1:0):0);
+    }
+    function updateGroupProg(gid){
+      const el=document.getElementById(gid+'-prog');
+      if(el)el.textContent=`${groupFilledCount(gid)}/${groupCounts[gid]}`;
+    }
+    function updateGroupProgs(){
+      Object.keys(groupCounts).forEach(updateGroupProg);
+    }
+
+    function toggleGroup(id){
+      document.getElementById(id).classList.toggle('open');
+    }
+    function switchTab(name,el){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('panel-'+name).classList.add('active');
+    }
+
+    function clearAll(){
+      if(!confirm('Clear all data? This cannot be undone.'))return;
+      state={};persist();
+      buildSurface();
+      document.querySelectorAll('.opt-btn,.yn-btn').forEach(b=>b.classList.remove('sel'));
+      document.querySelectorAll('input[data-k]').forEach(i=>i.value='');
+      updateGroupProgs();
+    }
+
+    function copyText(){
+      let out='SURFACE ASSESSMENT CHECKLIST\n'+'─'.repeat(40)+'\n\n';
+      surfaceItems.forEach((item,i)=>{
+        const d=state['s'+i]||{};
+        out+=`[${d.checked?'✓':' '}] ${item}\n`;
+        if(d.ini)out+=`    Initial: ${d.ini}\n`;
+        if(d.cmt)out+=`    Comment: ${d.cmt}\n`;
+        out+='\n';
+      });
+      out+='\nCONCRETE QUALITY & ASSURANCE\n'+'─'.repeat(40)+'\n\n';
+      const fields=[
+        ['Project type','proj_type'],['Use / occupancy','use'],['Description','proj_desc'],
+        ['Slab type','slab'],['Water stops','waterstop'],['Placement method','placement'],['Frame system','frame'],
+        ['Formwork type','formwork'],['Days to strip','cure_days'],
+        ['Strength (MPa)','strength_mpa'],['Strength (PSI)','strength_psi'],['Thickness','thickness'],
+        ['Fly ash','flyash'],['Mix doc available','mix_doc'],['Vibrated','vibrated'],
+        ['Surface finish','finish'],['What goes on top','ontop']
+      ];
+      fields.forEach(([label,k])=>{if(state[k])out+=`${label}: ${state[k]}\n`;});
+      const admixLabels={admix_sp:'Superplasticizer',admix_ext:'Extender',admix_ret:'Retarder',admix_cc:'Curing compound',admix_none:'None',admix_unk:'Unknown'};
+      const admixUsed=Object.keys(admixLabels).filter(k=>state[k]).map(k=>admixLabels[k]);
+      if(admixUsed.length)out+=`Admixtures: ${admixUsed.join(', ')}\n`;
+      navigator.clipboard.writeText(out).then(()=>alert('Copied to clipboard!'));
+    }
+
+    function exportPDF(){
+      const w=window.open('','_blank');
+      let h='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Assessment Checklist</title>';
+      h+='<style>body{font-family:Arial,sans-serif;font-size:10pt;margin:2cm}h1{font-size:13pt;margin-bottom:4px}h2{font-size:11pt;margin:14px 0 6px;color:#1D9E75}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{background:#f5f5f5;padding:5px 8px;text-align:left;border:1px solid #ddd;font-size:9pt}td{padding:5px 8px;border:1px solid #ddd;font-size:9.5pt;vertical-align:top}.ck{background:#f0fff4}.grp{margin-bottom:12px;border:1px solid #ddd;border-radius:4px;overflow:hidden}.grp-h{background:#f5f5f5;padding:6px 10px;font-weight:bold;font-size:10pt}.grp-b{padding:8px 10px}.row{display:flex;padding:4px 0;border-bottom:1px solid #eee;font-size:9.5pt}.row:last-child{border-bottom:none}.lbl{color:#555;width:38%;flex-shrink:0}.val{font-weight:500}</style></head><body>';
+      h+='<h1>Surface Assessment Checklist</h1>';
+      h+='<table><thead><tr><th style="width:44%">Item</th><th style="width:8%">✓</th><th style="width:12%">Initial</th><th>Comments</th></tr></thead><tbody>';
+      surfaceItems.forEach((item,i)=>{
+        const d=state['s'+i]||{};
+        h+=`<tr class="${d.checked?'ck':''}"><td>${item}</td><td style="text-align:center">${d.checked?'✓':''}</td><td>${d.ini||''}</td><td>${d.cmt||''}</td></tr>`;
+      });
+      h+='</tbody></table>';
+      h+='<h1 style="margin-top:20px">Concrete Quality & Assurance</h1>';
+      const groups=[
+        {title:'Project overview',rows:[['Project type','proj_type'],['Use / occupancy','use'],['Description','proj_desc']]},
+        {title:'Slab system & placement',rows:[['Slab type','slab'],['Water stops','waterstop'],['Placement','placement'],['Frame system','frame']]},
+        {title:'Formwork & curing',rows:[['Formwork','formwork'],['Days to strip','cure_days'],['Admixtures',null]]},
+        {title:'Mix design',rows:[['Strength (MPa)','strength_mpa'],['Strength (PSI)','strength_psi'],['Thickness','thickness'],['Fly ash','flyash'],['Mix doc','mix_doc'],['Vibrated','vibrated']]},
+        {title:'Finish & use',rows:[['Surface finish','finish'],['What goes on top','ontop']]}
+      ];
+      const admixLabels2={admix_sp:'Superplasticizer',admix_ext:'Extender',admix_ret:'Retarder',admix_cc:'Curing compound',admix_none:'None',admix_unk:'Unknown'};
+      groups.forEach(g=>{
+        h+=`<div class="grp"><div class="grp-h">${g.title}</div><div class="grp-b">`;
+        g.rows.forEach(([label,k])=>{
+          let val='—';
+          if(k===null){
+            const used=Object.keys(admixLabels2).filter(kk=>state[kk]).map(kk=>admixLabels2[kk]);
+            val=used.length?used.join(', '):'—';
+            label='Admixtures';
+          } else {val=state[k]||'—';}
+          h+=`<div class="row"><span class="lbl">${label}</span><span class="val">${val}</span></div>`;
+        });
+        h+='</div></div>';
+      });
+      h+='</body></html>';
+      w.document.write(h);w.document.close();
+      setTimeout(()=>w.print(),400);
+    }
+
+    loadState();
+    buildSurface();
+    restoreQuality();
+  </script>
+</body>
+</html>
